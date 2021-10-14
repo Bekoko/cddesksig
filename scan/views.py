@@ -13,7 +13,6 @@ from bitcoin import *
 from django import forms
 # verify
 from eth_account import Account
-from cryptoaddress import BitcoinAddress, EthereumAddress
 # sign message
 from eth_account.messages import encode_defunct
 
