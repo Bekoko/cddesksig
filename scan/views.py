@@ -15,9 +15,7 @@ from django import forms
 from eth_account import Account
 from cryptoaddress import BitcoinAddress, EthereumAddress
 # sign message
-from web3 import Web3
 from eth_account.messages import encode_defunct
-
 
 COIN = [
     ('Select', ('Select')),
@@ -89,7 +87,7 @@ def scan(request,*args,**kwargs):
         vs.stop()   
             
         # for eth
-        barcodeData = '8da4ef21b864d2cc526dbdb2a120bd2874c36c9d0a1fb7f8c63d7f7a8b41de8f'
+        # barcodeData = '8da4ef21b864d2cc526dbdb2a120bd2874c36c9d0a1fb7f8c63d7f7a8b41de8f'
         # for btc
         # barcodeData = '57c617d9b4e1f7af6ec97ca2ff57e94a28279a7eedd4d12a99fa11170e94f5a4'
 
@@ -114,13 +112,9 @@ def scan(request,*args,**kwargs):
         elif coin == "ETH":
             try:
 
-                # connect to web3 rpc
-                url_ = settings.RPC_URL['ETH_url']
-                w3 = Web3(Web3.HTTPProvider(url_))
-
                 # sign message
                 message = encode_defunct(text=message_to_sign)
-                signed_message = w3.eth.account.sign_message(message, private_key=barcodeData)
+                signed_message = Account.sign_message(message, private_key=barcodeData)
                 sig = signed_message.signature
                 signature = sig.hex()
 
