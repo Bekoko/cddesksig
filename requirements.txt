@@ -4,7 +4,6 @@ asgiref==3.4.1
 async-timeout==3.0.1
 attrs==21.2.0
 base58==2.1.0
-bitarray==1.2.2
 bitcoin==1.1.42
 bottle==0.12.19
 bottle-websocket==0.2.9
