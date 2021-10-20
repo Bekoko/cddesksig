@@ -21,6 +21,12 @@
           {% endfor %} 
         {% endif %}
 
+        {% if operation %}
+
+            {{ operation }}
+            
+        {% endif %}
+
         {% if signature %}
         <p>
 
@@ -36,8 +42,6 @@
                     </div>
                 </button>  
             </span>       
-
-
 
         </p>
         {% endif %}

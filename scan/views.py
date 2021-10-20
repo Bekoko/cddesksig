@@ -8,7 +8,7 @@ import imutils
 from pyzbar import pyzbar
 from imutils.video import VideoStream
 # import ecdsa
-from bitcoin import *
+from .cryptos import *
 # from django import forms
 from django import forms
 # verify
@@ -17,6 +17,8 @@ from eth_account import Account
 from eth_account.messages import encode_defunct
 # randome gen
 import secrets
+# eval
+import ast
 
 COIN = [
     ('Select', ('Select')),
@@ -117,18 +119,21 @@ def scan(request,*args,**kwargs):
         operation = form.cleaned_data.get('operation')
 
         if coin == "BTC":
+
+            c = Bitcoin()
+
             try:   
 
                 if operation == "message":
 
                     # sign message
-                    signature = ecdsa_sign(data_to_sign,barcodeData)
+                    signature = c.ecdsa_sign(data_to_sign,barcodeData)
 
                 else:
 
-                    tx = data_to_sign
-                    i = secrets.choice(range(1, 1000000000000000000))
-                    signature = sign(tx,i,barcodeData)                                    
+                    data_to_sign_dict=ast.literal_eval(data_to_sign)
+                    sig = c.sign(data_to_sign_dict,0,barcodeData)  
+                    signature = str(sig)                                  
 
             except:
 
@@ -152,8 +157,14 @@ def scan(request,*args,**kwargs):
 
                 else:
 
-                    signed_transaction = Account.sign_transaction(dynamic_fee_transaction, key)
-                    signature = signed_transaction.rawTransaction
+                    # convert string to dict
+                    data_to_sign_dict =ast.literal_eval(data_to_sign)                    
+
+                    signed_transaction = Account.sign_transaction(data_to_sign_dict, barcodeData)
+                    signature_hex = signed_transaction.rawTransaction
+
+                    # convert HexBytes to string
+                    signature = str(signature_hex)
 
             except:
                 messages.warning(request, (
@@ -166,6 +177,7 @@ def scan(request,*args,**kwargs):
 
     context = {
         'form':form,
+        'operation':operation,
         'signature': signature,
     }
     return render(request, 'scan/scan.html', context)
