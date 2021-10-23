@@ -90,6 +90,7 @@ def scan(request,*args,**kwargs):
                     cv2.putText(frame, text, (x, y - 10),
                         cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
                     if barcodeData:
+                        print("barcodeData",barcodeData)
                         raise barcodeData
             except:
                 if barcodeData:
@@ -120,17 +121,16 @@ def scan(request,*args,**kwargs):
 
         if coin == "BTC":
 
-            c = Bitcoin()
-
             try:   
 
                 if operation == "message":
 
                     # sign message
-                    signature = c.ecdsa_sign(data_to_sign,barcodeData)
+                    signature = ecdsa_sign(data_to_sign,barcodeData,coin)
 
                 else:
 
+                    c = Bitcoin()                                    
                     data_to_sign_dict=ast.literal_eval(data_to_sign)
                     sig = c.sign(data_to_sign_dict,0,barcodeData)  
                     signature = str(sig)                                  
@@ -138,7 +138,7 @@ def scan(request,*args,**kwargs):
             except:
 
                 messages.warning(request, (
-                    "Signature provided not valid. \n"
+                    "BTC Signature provided not valid. \n"
                     "Please try again with new signature."
                     )
                 )               
@@ -168,7 +168,7 @@ def scan(request,*args,**kwargs):
 
             except:
                 messages.warning(request, (
-                    "Signature provided not valid. \n"
+                    "ETH Signature provided not valid. \n"
                     "Please try again with new signature."
                     )
                 )               
