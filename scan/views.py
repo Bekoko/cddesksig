@@ -19,6 +19,8 @@ from eth_account.messages import encode_defunct
 import secrets
 # eval
 import ast
+# regex to add space
+import re
 
 COIN = [
     ('Select', ('Select')),
@@ -42,7 +44,7 @@ class StartForm(forms.Form):
         required=True,
         max_length=100000,
         label="Data to sign",
-        widget=forms.TextInput(attrs=attr),
+        widget=forms.Textarea
     )     
 
     coin = forms.ChoiceField(
@@ -109,13 +111,12 @@ def scan(request,*args,**kwargs):
         cv2.destroyAllWindows()
         vs.stop()   
             
-        # mocks for tests:
-        # for eth
-        # barcodeData = '8da4ef21b864d2cc526dbdb2a120bd2874c36c9d0a1fb7f8c63d7f7a8b41de8f'
-        # for btc
-        # barcodeData = '57c617d9b4e1f7af6ec97ca2ff57e94a28279a7eedd4d12a99fa11170e94f5a4'
-
         data_to_sign = form.cleaned_data.get('data_to_sign')
+        print("len(data_to_sign)",data_to_sign,len(data_to_sign))
+        # add blank space after "message." using r'\1<space>'
+        data_to_sign = re.sub(r'(sign this message\.)', r'\1 ', data_to_sign)
+        # print("len(data_to_sign)",data_to_sign,len(data_to_sign))
+        
         coin = form.cleaned_data.get('coin')
         operation = form.cleaned_data.get('operation')
 
@@ -127,6 +128,12 @@ def scan(request,*args,**kwargs):
 
                     # sign message
                     signature = ecdsa_sign(data_to_sign,barcodeData,coin)
+
+                    # verify
+                    print("privtoaddr",Bitcoin().privtoaddr(barcodeData))
+                    print("ecdsa_recover",ecdsa_recover(data_to_sign, signature))
+                    pub=ecdsa_recover(data_to_sign, signature)
+                    print("ecdsa_verify",ecdsa_verify(data_to_sign,signature,pub))
 
                 else:
 
@@ -154,6 +161,12 @@ def scan(request,*args,**kwargs):
                     signed_message = Account.sign_message(message, private_key=barcodeData)
                     sig = signed_message.signature
                     signature = sig.hex()
+
+                    print("len(message)",len(data_to_sign))
+                    print("len(signature)",len(signature))
+
+                    r = Account.recover_message(message,signature=signature)
+                    print("r",r)
 
                 else:
 
