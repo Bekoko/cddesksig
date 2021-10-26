@@ -44,7 +44,7 @@ class StartForm(forms.Form):
         required=True,
         max_length=100000,
         label="Data to sign",
-        widget=forms.TextInput(attrs=attrs),
+        widget=forms.TextInput(attrs=attr),
     )     
 
     coin = forms.ChoiceField(
