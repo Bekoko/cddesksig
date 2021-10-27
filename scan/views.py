@@ -140,11 +140,8 @@ def scan(request,*args,**kwargs):
      
                     # wif = privToWif(barcodeData)
                     signature = ecdsa_sign(data_to_sign,barcodeData)
-                    print("sig",signature)
 
-                    signature = chr(ord(signature[0]) + 1) + signature[1:]
-
-                    print("Bitcoin().privtoaddr(barcodeData)",Bitcoin().privtoaddr(barcodeData))
+                    # signature = chr(ord(signature[0]) + 1) + signature[1:]
 
                     # # verify
                     pub=ecdsa_recover(data_to_sign, signature)
