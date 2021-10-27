@@ -21,6 +21,9 @@ import secrets
 import ast
 # regex to add space
 import re
+# from bitcoin import *
+from .utils import *
+
 
 COIN = [
     ('Select', ('Select')),
@@ -37,14 +40,20 @@ OPERATION = [
 class StartForm(forms.Form):
     """
     """           
+    def __init__(self, *args, **kwargs):
+        super(StartForm, self).__init__(*args, **kwargs)
+        self.fields['data_to_sign'].strip = False
+        self.fields['data_to_sign'].empty_value = True
+
     attr = {
-    "name":"data_to_sign"
+        "name":"data_to_sign",
     }
     data_to_sign = forms.CharField(
         required=True,
         max_length=100000,
         label="Data to sign",
-        widget=forms.TextInput(attrs=attr),
+        widget=forms.Textarea(attrs=attr),
+
     )     
 
     coin = forms.ChoiceField(
@@ -57,12 +66,14 @@ class StartForm(forms.Form):
         choices=OPERATION,
         required=True,
         label="Operation",
-    )   
+)
 
 
 # Create your views here.
 def scan(request,*args,**kwargs):
-
+    """
+    to wif priv key = https://github.com/crcarlo/btcwif/blob/master/btcwif.py#L63
+    """
     # params
     coin = None
     operation = None
@@ -92,7 +103,7 @@ def scan(request,*args,**kwargs):
                     cv2.putText(frame, text, (x, y - 10),
                         cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
                     if barcodeData:
-                        print("barcodeData",barcodeData)
+                        print("barcodeData cam",barcodeData)
                         raise barcodeData
             except:
                 if barcodeData:
@@ -110,30 +121,34 @@ def scan(request,*args,**kwargs):
 
         cv2.destroyAllWindows()
         vs.stop()   
-            
-        data_to_sign = form.cleaned_data.get('data_to_sign')
-        print("len(data_to_sign)",data_to_sign,len(data_to_sign))
-        # add blank space after "message." using r'\1<space>'
-        data_to_sign = re.sub(r'(sign this message\.)', r'\1 ', data_to_sign)
-        # print("len(data_to_sign)",data_to_sign,len(data_to_sign))
-        
+          
         coin = form.cleaned_data.get('coin')
         operation = form.cleaned_data.get('operation')
+        data_to_sign = form.cleaned_data.get('data_to_sign')
+
+        # remove \r from text
+        data_to_sign = data_to_sign.replace('\r', '')
+
+        # priv for tests
+        # barcodeData = "F34F5F802635A4402ABB6B1A2FC1371DBDC0AE9BD067E72E6AFA4AFCFEAA38CF"
 
         if coin == "BTC":
 
             try:   
 
                 if operation == "message":
+     
+                    # wif = privToWif(barcodeData)
+                    signature = ecdsa_sign(data_to_sign,barcodeData)
+                    print("sig",signature)
 
-                    # sign message
-                    signature = ecdsa_sign(data_to_sign,barcodeData,coin)
+                    signature = chr(ord(signature[0]) + 1) + signature[1:]
 
-                    # verify
-                    print("privtoaddr",Bitcoin().privtoaddr(barcodeData))
-                    print("ecdsa_recover",ecdsa_recover(data_to_sign, signature))
+                    print("Bitcoin().privtoaddr(barcodeData)",Bitcoin().privtoaddr(barcodeData))
+
+                    # # verify
                     pub=ecdsa_recover(data_to_sign, signature)
-                    print("ecdsa_verify",ecdsa_verify(data_to_sign,signature,pub))
+                    assert ecdsa_verify(data_to_sign,signature,pub) is True
 
                 else:
 
@@ -152,6 +167,7 @@ def scan(request,*args,**kwargs):
                 return redirect(request.get_full_path())  
 
         elif coin == "ETH":
+
             try:
 
                 if operation == "message":                
@@ -162,11 +178,11 @@ def scan(request,*args,**kwargs):
                     sig = signed_message.signature
                     signature = sig.hex()
 
-                    print("len(message)",len(data_to_sign))
-                    print("len(signature)",len(signature))
+                    # print("len(message)",len(data_to_sign))
+                    # print("len(signature)",len(signature))
 
                     r = Account.recover_message(message,signature=signature)
-                    print("r",r)
+                    # print("r",r)
 
                 else:
 
@@ -194,5 +210,24 @@ def scan(request,*args,**kwargs):
         'signature': signature,
     }
     return render(request, 'scan/scan.html', context)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
