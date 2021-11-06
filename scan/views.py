@@ -32,6 +32,8 @@ COIN = [
 ]
 
 OPERATION = [
+    ('Select', ('Select')),
+    ('address', ('Crypto Address')),    
     ('message',('Sign Message')),
     ('transaction',('Sign Transaction')),
 ]
@@ -42,14 +44,16 @@ class StartForm(forms.Form):
     """           
     def __init__(self, *args, **kwargs):
         super(StartForm, self).__init__(*args, **kwargs)
-        self.fields['data_to_sign'].strip = False
-        self.fields['data_to_sign'].empty_value = True
 
-    attr = {
+        self.fields['data_to_sign'].strip = False
+        # self.fields['data_to_sign'].empty_value = True
+
+    attr = { 
         "name":"data_to_sign",
     }
+
     data_to_sign = forms.CharField(
-        required=True,
+        required=False,
         max_length=100000,
         label="Data to sign",
         widget=forms.Textarea(attrs=attr),
@@ -58,7 +62,7 @@ class StartForm(forms.Form):
 
     coin = forms.ChoiceField(
         choices=COIN,
-        required=True,
+        required=False,
         label="Coin",
     )
 
@@ -131,6 +135,18 @@ def scan(request,*args,**kwargs):
 
         # priv for tests
         # barcodeData = "F34F5F802635A4402ABB6B1A2FC1371DBDC0AE9BD067E72E6AFA4AFCFEAA38CF"
+
+        if operation == "address":
+
+            signature = barcodeData
+
+            context = {
+                'form':form,
+                'operation':operation,
+                'signature': signature,
+            }
+            return render(request, 'scan/scan.html', context)
+
 
         if coin == "BTC":
 
