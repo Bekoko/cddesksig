@@ -216,6 +216,8 @@ def scan(request,*args,**kwargs):
                 )               
                 return redirect(request.get_full_path())
 
+        # attribut new value to memory place having read private keys
+        barcodeData = 0
 
     context = {
         'form':form,
