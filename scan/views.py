@@ -107,7 +107,6 @@ def scan(request,*args,**kwargs):
                     cv2.putText(frame, text, (x, y - 10),
                         cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
                     if barcodeData:
-                        print("barcodeData cam",barcodeData)
                         raise barcodeData
             except:
                 if barcodeData:
@@ -163,6 +162,10 @@ def scan(request,*args,**kwargs):
                     pub=ecdsa_recover(data_to_sign, signature)
                     assert ecdsa_verify(data_to_sign,signature,pub) is True
 
+
+                    # attribut new value to memory place having read private keys
+                    barcodeData = 0
+
                 else:
 
                     c = Bitcoin()                                    
@@ -170,7 +173,13 @@ def scan(request,*args,**kwargs):
                     sig = c.sign(data_to_sign_dict,0,barcodeData)  
                     signature = str(sig)                                  
 
+                    # attribut new value to memory place having read private keys
+                    barcodeData = 0
+
             except:
+
+                # attribut new value to memory place having read private keys
+                barcodeData = 0
 
                 messages.warning(request, (
                     "BTC Signature provided not valid. \n"
@@ -197,6 +206,9 @@ def scan(request,*args,**kwargs):
                     r = Account.recover_message(message,signature=signature)
                     # print("r",r)
 
+                    # attribut new value to memory place having read private keys
+                    barcodeData = 0
+
                 else:
 
                     # convert string to dict
@@ -208,12 +220,18 @@ def scan(request,*args,**kwargs):
                     # convert HexBytes to string
                     signature = str(signature_hex)
 
+                    # attribut new value to memory place having read private keys
+                    barcodeData = 0
+
             except:
                 messages.warning(request, (
                     "ETH Signature provided not valid. \n"
                     "Please try again with new signature."
                     )
-                )               
+                )  
+                
+                # attribut new value to memory place having read private keys                   
+                barcodeData = 0                          
                 return redirect(request.get_full_path())
 
         # attribut new value to memory place having read private keys
